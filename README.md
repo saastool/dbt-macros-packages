@@ -74,6 +74,13 @@ This template will develop and run dbt commands using the dbt Cloud CLI — a db
 
 - Create python virtual env for dbt
   - For venv and and docker, using the [installation instructions](https://docs.getdbt.com/docs/core/installation-overview) for your operating system.
+  - For conda in Mac, open terminal as usual
+
+    ```command
+    (base) ~ % conda create -n jinja 
+    (base) ~ % conda activate jinja
+    ```
+    
   - For conda in Windows, open conda prompt terminal in ***system administrador priviledge***
 
     ```command
@@ -96,12 +103,21 @@ This template will develop and run dbt commands using the dbt Cloud CLI — a db
 
 - Start up db and pgadmin
   . use admin/Password as connection
-
-  ```
-  (dbt) C:> cd C:\Proj\myProject\50-GIT\dbt-core-qs-ex1
-  (dbt) C:> bin\db-start-pg.bat
-  ``` 
-
+  
+  - ***Windows***:
+    
+    ```
+    (dbt) C:> cd C:\Proj\myProject\50-GIT\dbt-core-qs-ex1
+    (dbt) C:> bin\db-start-pg.bat
+    ```
+    
+  - ***Mac***:
+    
+    ```
+    (dbt) ~ % cd ~/Projects/dbt-macros-packages/
+    (dbt) ~ % source ./db-start-pg.sh
+    (dbt) ~ % source ./db-pgadm.sh
+    ``` 
 
 ## [3 Create a project​](https://docs.getdbt.com/guides/manual-install?step=3)
 
