@@ -115,8 +115,8 @@ This template will develop and run dbt commands using the dbt Cloud CLI — a db
     
     ```
     (dbt) ~ % cd ~/Projects/dbt-macros-packages/
-    (dbt) ~ % source ./db-start-pg.sh
-    (dbt) ~ % source ./db-pgadm.sh
+    (dbt) ~ % source ./bin/db-start-pg.sh
+    (dbt) ~ % source ./bin/db-pgadm.sh
     ``` 
 
 ## [3 Create a project​](https://docs.getdbt.com/guides/manual-install?step=3)
