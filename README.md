@@ -19,18 +19,15 @@ This is a `dbt-macros-packages` quickstart template, that supports PostgreSQL ru
   - [2 Create a repository and env prepare​](#2-create-a-repository-and-env-prepare)
   - [3 Create a project​](#3-create-a-project)
   - [4 Connect to PostgreSQL​](#4-connect-to-postgresql)
-  - [5 Perform your first dbt run​](#5-perform-your-first-dbt-run)
-  - [6 Commit your changes​](#6-commit-your-changes)
-  - [7 Checkout a new git branch​](#7-checkout-a-new-git-branch)
-  - [8 Build your first model​](#8-build-your-first-model)
-  - [9 Change the way your model is materialized​](#9-change-the-way-your-model-is-materialized)
-  - [10 Delete the example models​](#10-delete-the-example-models)
-  - [11 Build models on top of other models​](#11-build-models-on-top-of-other-models)
-  - [12 Add tests to your models​](#12-add-tests-to-your-models)
-  - [13 Document your models​](#13-document-your-models)
-  - [14 Commit updated changes​](#14-commit-updated-changes)
-  - [15 Schedule a job​](#15-schedule-a-job)
-  - [16 Supplemental Install](#16-supplemental-install)
+  - [5 Build Basic Model](#5-build-basic-model)
+  - [6 Use a for loop in models for repeated SQL​](#6-use-a-for-loop-in-models-for-repeated-sql)
+  - [7 Set Variables​](#7-set-variables)
+  - [8 Build models on top of other models​​](#8-build-your-models-on-top-of-other-models)
+  - [9 Use whitespace control to tidy up compiled code​](#9-use-whitespace-control-to-tidy-up-compiled-code)
+  - [10 Use a macro to return payment methods​](#10-use-a-macro-to-return-payment-methods)
+  - [11 Dynamically retrieve the list of payment methods](#11-dynamically-retrieve-the-list-of-payment-methods)
+  - [12 Write modular macros](#12-write-modular-macros)
+  - [13 Use a macro from a package​](#13-use-a-macro-from-a-package)
 
 # Steps
 
@@ -324,81 +321,184 @@ group by 1
 
 - Execute dbt run.
 
-## [13 Document your models​](https://docs.getdbt.com/guides/manual-install?step=13)
+## [10 Use a macro to return payment methods](https://docs.getdbt.com/guides/using-jinja?step=7)
 
-Adding documentation to your project allows you to describe your models in rich detail, and share that information with your team. Here, we're going to add some basic documentation to our project.
+Furthermore, we can wrap it up by using a macro in case we want to reuse multiple times in the future. We have practiced macro back in jinja2 101, now let's try using it with DBT.
 
-- Update your models/schema.yml file to include some descriptions, such as those below.
-  
-***models/schema.yml***
+DBT stored macros in `/macros/` folder, 
+- Create a new SQL file in the macros directory, named macros/**get_payment_methods.sql**.
+- Paste the following query into the macros/**get_payment_methods.sql** file:
 
-```YAML
-version: 2
-
-models:
-  - name: customers
-    description: One record per customer
-    columns:
-      - name: customer_id
-        description: Primary key
-        tests:
-          - unique
-          - not_null
-      - name: first_order_date
-        description: NULL when a customer has not yet placed an order.
-
-  - name: stg_customers
-    description: This model cleans up customer data
-    columns:
-      - name: customer_id
-        description: Primary key
-        tests:
-          - unique
-          - not_null
-
-  - name: stg_orders
-    description: This model cleans up order data
-    columns:
-      - name: order_id
-        description: Primary key
-        tests:
-          - unique
-          - not_null
-      - name: status
-        tests:
-          - accepted_values:
-              values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
-      - name: customer_id
-        tests:
-          - not_null
-          - relationships:
-              to: ref('stg_customers')
-              field: customer_id
+```SQL
+{% macro get_payment_methods() %}
+{{ return(["bank_transfer", "credit_card", "gift_card"]) }}
+{% endmacro %}
 ```
 
-- Run ***dbt docs generate*** to generate the documentation for your project. dbt introspects your project and your warehouse to generate a JSON file with rich documentation about your project.
-- Run ***dbt docs serve*** command to launch the documentation in a local website.
+- Then edit models/**order_payment_method_amounts.sql**:
 
-## [14 Commit updated changes​](https://docs.getdbt.com/guides/manual-install?step=14)
+```SQL
+{%- set payment_methods = get_payment_methods() -%}
 
-- You need to commit the changes you made to the project so that the repository has your latest code.
+select
+order_id,
+{%- for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount
+{%- if not loop.last %},{% endif -%}
+{% endfor %}
+from {{ ref('raw_payments') }}
+group by 1
+```
 
-- Add all your changes to git: git add -A
-- Commit your changes: git commit -m "Add customers model, tests, docs"
-- Push your changes to your repository: git push
-Navigate to your repository, and open a pull request to merge the code into your master branch.
+- Execute dbt run.
 
-## [15 Schedule a job​](https://docs.getdbt.com/guides/manual-install?step=15)
+## [11 Dynamically retrieve the list of payment methods](https://docs.getdbt.com/guides/using-jinja?step=8)
 
-- Instead of dbt-cloud, we will leverage airflow to schedule.
-- [dbt airflow blog post](https://docs.getdbt.com/blog/dbt-airflow-spiritual-alignment)
+The list is actually stored in `raw_payment`. If a new payment_method was introduced, inserted, or one of the existing methods was renamed, the list would need to be updated accordingly. We have to change macro into query.
 
-## 16 Supplemental Install
+- Paste the following query into the macros/**get_payment_methods.sql** file:
 
-- Visual Code Addon
-  - dbt-osmosis
-  - Power User for dbt
-  
-- Python package
-  - dbt-loom
-  
+```SQL
+{% macro get_payment_methods() %}
+
+{% set payment_methods_query %}
+select distinct
+payment_method
+from {{ ref('raw_payments') }}
+order by 1
+{% endset %}
+
+{% set results = run_query(payment_methods_query) %}
+
+{{ log(results, info=True) }}
+
+{{ return([]) }}
+
+{% endmacro %}
+```
+
+The easiest way to use a statement is through the `run_query macro`. For the first version, let's check what we get back from the database, by logging the results to the command line using the `log` function.
+
+The command line gives us back the following:
+
+```command
+| column         | data_type |
+| -------------- | --------- |
+| payment_method | Text      |
+```
+
+This is an Agate table, a Python Library class. To get the payment methods back as a list, we need to do some further transformation.
+
+```SQL
+{% macro get_payment_methods() %}
+
+{% set payment_methods_query %}
+select distinct
+payment_method
+from {{ ref('raw_payments') }}
+order by 1
+{% endset %}
+
+{% set results = run_query(payment_methods_query) %}
+
+{% if execute %}
+{# Return the first column #}
+{% set results_list = results.columns[0].values() %}
+{% else %}
+{% set results_list = [] %}
+{% endif %}
+
+{{ return(results_list) }}
+
+{% endmacro %}
+```
+
+We used the execute variable to ensure that the code runs during the `parse` stage of dbt (otherwise an error would be thrown).
+
+- Execute dbt run.
+
+## [12 Write modular macros](https://docs.getdbt.com/guides/using-jinja?step=9)
+
+The macro looks great now, but what if we want to use a specific part of the macro in the future?
+
+To do that we must seperate macro into modular pieces, this is a very important coding methodology.
+
+- Seperate SQL into macros/**get_column_values.sql** and macros/**get_payment_methods.sql**:
+
+get_column_values.sql
+```SQL
+{% macro get_column_values(column_name, relation) %}
+
+{% set relation_query %}
+select distinct
+{{ column_name }}
+from {{ relation }}
+order by 1
+{% endset %}
+
+{% set results = run_query(relation_query) %}
+
+{% if execute %}
+{# Return the first column #}
+{% set results_list = results.columns[0].values() %}
+{% else %}
+{% set results_list = [] %}
+{% endif %}
+
+{{ return(results_list) }}
+
+{% endmacro %}
+```
+
+get_payment_methods.sql
+```SQL
+{% macro get_payment_methods() %}
+
+{{ return(get_column_values('payment_method', ref('raw_payments'))) }}
+
+{% endmacro %}
+```
+
+- Execute dbt run.
+
+## [13 Use a macro from a package](https://docs.getdbt.com/guides/using-jinja?step=10)
+
+Another powerful feature macro can do is their ability to be shared across projects. A number of useful dbt macros have already been written in the `dbt-utils` package. Actually the `get_column_values` macro from `dbt-utils` could be used instead of the `get_column_values` macro we wrote ourselves.
+
+Install the `dbt-utils` package in the project.
+
+- Add a file named `packages.yml` in dbt project. This should be at the same level as `dbt_project.yml` file.
+- Paste the following query into the `packages.yml` file we just create:
+
+```SQL
+packages:
+  - git: "https://github.com/dbt-labs/dbt-utils.git"
+    revision: 1.3.0
+```
+`Git` tells DBT where to download the package, and site the git's **tag name** or **branch name** behind `revision`
+
+- Execute `dbt deps`, then dbt would install designated package into ` dbt_packages` directory which is ignore by git in default.
+
+- Paste the following query into the macros/**get_payment_methods.sql** file, in order to update the model to use the macro from the package instead:
+
+```SQL
+{%- set payment_methods = dbt_utils.get_column_values(
+    table=ref('raw_payments'),
+    column='payment_method'
+) -%}
+
+select
+order_id,
+{%- for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount
+{%- if not loop.last %},{% endif -%}
+{% endfor %}
+from {{ ref('raw_payments') }}
+group by 1
+```
+
+- Now we can remove the macros that we built in previous steps.
+
+- Execute dbt run.
+
+Our dbt-macros-packages turtorial ends here, we have learnt how to use jinja with dbt, macro and package, and the potential of it. This is just a tip of it, but is enough to prepared anyone to dive in to any project that use dbt. Much more, if you want to learn more about what else can the packages do, please check in [dbt-util](https://github.com/dbt-labs/dbt-utils).
