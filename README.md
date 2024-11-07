@@ -1,18 +1,17 @@
-# `dbt-core` Quickstart
+# `dbt-macros-packages` Quickstart
 
 [![Generic badge](https://img.shields.io/badge/dbt-1.8.8-blue.svg)](https://docs.getdbt.com/dbt-cli/cli-overview)
 [![Generic badge](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Generic badge](https://img.shields.io/badge/Python-3.11.10-blue.svg)](https://www.python.org/)
 [![Generic badge](https://img.shields.io/badge/Podman-5.0.2-blue.svg)](https://www.docker.com/)
 
-This is a `dbt-core` quickstart template, that supports PostgreSQL run with podman.
+This is a `dbt-macros-packages` quickstart template, that supports PostgreSQL run with podman. This turtorial assumed viewer has basic DBT and Jinja knowledge. If not please have these lessons first.
+  - [dbt-core-quickstart-template](https://github.com/saastoolset/dbt-core-quickstart-template)
+  - [Jinja2-101-template](https://github.com/saastool/jinja2-101)
   
-  This `dbt-core` quickstart taken from the various [dbt Developer Hub](https://docs.getdbt.com/guides) and [dbt courses](https://courses.getdbt.com/collections), using `PostgreSQL` as the data warehouse. There you are going to find the following  course:
+  This `dbt-macros-packages` quickstart taken from the various [dbt Developer Hub](https://docs.getdbt.com/guides/using-jinja) and the infrastructure is based on [dbt-core-quickstart-template](https://github.com/saastoolset/dbt-core-quickstart-template), using `PostgreSQL` as the data warehouse. 
 
-- [dbt quickstart](https://docs.getdbt.com/docs/get-started-dbt)
-
-In this tutorial, for the purpose of `dbt-core` exercises, I made some modifications to the `profiles.yml` file to use the local `PostgreSQL` repository.
-
+  If you have finished dbt-core-quickstart-template before, the infrastructure and architect we using here are total the same. That is to say, you can skip directly to [Step 3 Create a project​](#3-create-a-project)
 
 - [`dbt-core` Quickstart](#dbt-core-quickstart)
 - [Steps](#steps)
@@ -74,14 +73,14 @@ This template will develop and run dbt commands using the dbt Cloud CLI — a db
 
 - Create python virtual env for dbt
   - For venv and and docker, using the [installation instructions](https://docs.getdbt.com/docs/core/installation-overview) for your operating system.
-  - For conda in Mac, open terminal as usual
+  - For conda in **Mac**, open terminal as usual
 
     ```command
     (base) ~ % conda create -n jinja 
     (base) ~ % conda activate jinja
     ```
     
-  - For conda in Windows, open conda prompt terminal in ***system administrador priviledge***
+  - For conda in **Windows**, open conda prompt terminal in ***system administrador priviledge***
 
     ```command
     (base) C:> conda create -n dbt dbt-core dbt-postgres
@@ -124,44 +123,20 @@ This template will develop and run dbt commands using the dbt Cloud CLI — a db
 Make sure you have dbt Core installed and check the version using the dbt --version command:
 
 ```
-C:> dbt --version
+dbt --version
 ```
 
 - Init project in repository home directory
   Initiate the jaffle_shop project using the init command:
 
 ```python
-C:> dbt init jaffle_shop
+dbt init dbt_jinja
 ```
 
-Navigate into your project's directory:
-
-```command
-C:> cd jaffle_shop
-```
-
-Use pwd to confirm that you are in the right spot:
-
-```command
-C:>  cd
-
-(dbt) C:\Proj\myProject\50-GIT\dbt-core-qs-ex1\jaffle_shop>
-```
-
-Use a code editor VSCode to open the project directory
-
-```command
-(dbt) C:\Proj\myProject\50-GIT\dbt-core-qs-ex1\jaffle_shop> code .
-```
-
-## [4 Connect to PostgreSQL​](https://docs.getdbt.com/guides/manual-install?step=4)
-
-
-- Update `profiles.yml`
-Now we should create the `profiles.yml` file on the `C:\Users\YourID\.dbt` directory. The file should look like this:
+DBT will configure connection while initiating project, just follow the information below. After initialization, the configuration can be found in `profiles.yml`.
 
 ```YAML
-jaffle_shop:
+dbt_jinja:
   outputs:
     dev:
       dbname: postgres
@@ -169,155 +144,74 @@ jaffle_shop:
       user: admin      
       pass: Passw0rd 
       port: 5432
-      schema: dbt
+      schema: dbt_jinja
       threads: 1
       type: postgres
   target: dev
 ```
 
+
+Navigate into your project's directory:
+
+```command
+cd dbt_jinja
+```
+
+Use pwd to confirm that you are in the right spot:
+
+```command
+ pwd
+```
+
+Use a code editor VSCode to open the project directory
+
+```command
+(dbt) ~\Projects\dbt_jinja> code .
+```
+Let's remove models/example/ directory, we won't use any of it in this turtorial
+
+## [4 Connect to PostgreSQL​](https://docs.getdbt.com/guides/manual-install?step=4)
+
 - Test connection config
 
 ```
-C:> dbt debug
+dbt debug
 ``` 
 
 - Load sample data
  We should copy this data from the `db/seeds` directory.
 
-
-  - Edit `dbt_project.yml`
-  Now we should create the `dbt_project.yml` file on the `jaffle_shop` directory. Append following config:
-
-  ```YAML
-  seeds:
-    jaffle_shop:
-      +schema: jaffle_shop
-  ```
-
-
   - copy seeds data
+  **Windows**
   ```
-  C:> copy ..\db\seeds\*.csv seeds
-  C:> dbt seed
+  copy ..\db\seeds\*.csv seeds
+  dbt seed
   ```
 
-- Verfiy result in database client
-This command will spin and will create the `dbt_jaffle_shop` schema, and create and insert the `.csv` files to the following tables:
-
-  - `dbt_jaffle_shop.customers`
-  - `dbt_jaffle_shop.orders`
-  - `dbt_jaffle_shop.payments`
-
-
-## [5 Perform your first dbt run​](https://docs.getdbt.com/guides/manual-install?step=5)
-
-Perform your first dbt run
-Our sample project has some example models in it. We're going to check that we can run them to confirm everything is in order.
-
-Enter the run command to build example models:
-
-```
-dbt run
-```
-
-## [6 Commit your changes​](https://docs.getdbt.com/guides/manual-install?step=6)
-
-Commit your changes so that the repository contains the latest code.
-
-Link the GitHub repository you created to your dbt project by running the following commands in Terminal. Make sure you use the correct git URL for your repository, which you should have saved from step 5 in Create a repository.
-
-- Use git client tool
-or
-- Use git command line
+  **Mac**
+  ```
+  copy ../db/seeds/*.csv seeds
+  dbt seed
+  ```
   
-```
-git init
-git branch -M main
-git add .
-git commit -m "Create a dbt project"
-git remote add origin https://github.com/USERNAME/dbt-core-qs-ex1.git
-git push -u origin main
-```
+- Verfiy result in database client
+This command will create and insert the `.csv` files to the `dbt_jinja.raw_payments` table
 
-Return to your GitHub repository to verify your new files have been added.
-
-## [7 Checkout a new git branch​](https://docs.getdbt.com/guides/manual-install?step=7)
-
-Check out a new git branch to work on new code:
-
-Create a new branch by using the checkout command and passing the -b flag:
-
-- Use git client tool
-or
-- Use git command line
-
-```
-$ git checkout -b add-customers-model
-> Switched to a new branch `add-customer-model`
-```
-
-## [8 Build your first model​](https://docs.getdbt.com/guides/manual-install?step=8)
+## [5 Build Basic Model](https://docs.getdbt.com/guides/using-jinja?step=2)
 
 - Open your project in your favorite code editor.
-- Create a new SQL file in the models directory, named models/customers.sql.
-- Paste the following query into the models/customers.sql file.
+- Create a new SQL file in the models directory, named models/**order_payment_method_amounts.sql**.
+- Paste the following query into the models/**order_payment_method_amounts.sql** file.
 
 ```SQL
-with customers as (
-
-    select
-        id as customer_id,
-        first_name,
-        last_name
-
-    from dbt_jaffle_shop.customers
-
-),
-
-orders as (
-
-    select
-        id as order_id,
-        user_id as customer_id,
-        order_date,
-        status
-
-    from dbt_jaffle_shop.orders
-
-),
-
-customer_orders as (
-
-    select
-        customer_id,
-
-        min(order_date) as first_order_date,
-        max(order_date) as most_recent_order_date,
-        count(order_id) as number_of_orders
-
-    from orders
-
-    group by 1
-
-),
-
-final as (
-
-    select
-        customers.customer_id,
-        customers.first_name,
-        customers.last_name,
-        customer_orders.first_order_date,
-        customer_orders.most_recent_order_date,
-        coalesce(customer_orders.number_of_orders, 0) as number_of_orders
-
-    from customers
-
-    left join customer_orders using (customer_id)
-
-)
-
-select * from final
+select
+order_id,
+sum(case when payment_method = 'bank_transfer' then amount end) as bank_transfer_amount,
+sum(case when payment_method = 'credit_card' then amount end) as credit_card_amount,
+sum(case when payment_method = 'gift_card' then amount end) as gift_card_amount,
+sum(amount) as total_amount
+from {{ ref('raw_payments') }}
+group by 1
 ```
 
 - From the command line, enter
@@ -326,204 +220,109 @@ select * from final
 dbt run
 ```
 
-## [9 Change the way your model is materialized​](https://docs.getdbt.com/guides/manual-install?step=9)
+- This SQL sums up each payment method's amount by order. This is basic SQL writting, but with some potential maintainance issues:
+  - If the logic or field name were to change, the code would need to be updated in three places.
+  - Often this code is created by copying and pasting, which may lead to mistakes.
+  - Other analysts that review the code are less likely to notice errors as it's common to only scan through repeated code.
 
-By default, everything gets created as a view. You can override that at the directory level so everything in that directory will materialize to a different materialization.
+  So let's resolve these issues by applying macros.
 
-- Edit your dbt_project.yml file.
+## [6 Use a for loop in models for repeated SQL​](https://docs.getdbt.com/guides/using-jinja?step=3)
 
-  - Update your project name to:
+An intuitive approached for repeated codes is using loop, so let's give it a try:
 
- ```
-    name: 'jaffle_shop'
- ```
-
-- Configure jaffle_shop so everything in it will be materialized as a table; and configure example so everything in it will be materialized as a view. Update your models config block to:
-
-```
-models:
-  jaffle_shop:
-    +materialized: table
-    example:
-      +materialized: view
-```
-
-- Enter the dbt run command. Your customers model should now be built as a table!
+- Edit models/**order_payment_method_amounts.sql**:
   
-- Edit models/customers.sql to override the dbt_project.yml for the customers model only by adding the following snippet to the top, and click Save:
-  
-```
-
-{{
-  config(
-    materialized='view'
-  )
-}}
-
-with customers as (
-
-    select
-        id as customer_id
-        ...
-
-)
-
-```
-
-- Enter the dbt run command. Your model, customers, should now build as a view.
-
-## [10 Delete the example models​](https://docs.getdbt.com/guides/manual-install?step=10)
-
-You can now delete the files that dbt created when you initialized the project:
-
-- Delete the models/example/ directory.
-
-- Delete the example: key from your dbt_project.yml file, and any configurations that are listed under it.
--
-
-```
-# before
-models:
-  jaffle_shop:
-    +materialized: table
-    example:
-      +materialized: view
-```
-
-```
-# after
-models:
-  jaffle_shop:
-    +materialized: table
-```
-
-## [11 Build models on top of other models​](https://docs.getdbt.com/guides/manual-install?step=11)
-
-Now you can experiment by separating the logic out into separate models and using the ref function to build models on top of other models:
-
-- Create a new SQL file, models/stg_customers.sql, with the SQL from the customers CTE in our original query.
-- Create a second new SQL file, models/stg_orders.sql, with the SQL from the orders CTE in our original query.
-
-***models/stg_customers.sql***
-
 ```SQL
 select
-    id as customer_id,
-    first_name,
-    last_name
-
-from dbt_jaffle_shop.customers
+order_id,
+{% for payment_method in ["bank_transfer", "credit_card", "gift_card"] %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount,
+{% endfor %}
+sum(amount) as total_amount
+from {{ ref('raw_payments') }}
+group by 1
 ```
+
+- Enter the dbt run in command-line.
+
+- Open the compiled SQL file in /target/compiled/dbt_jinja/models/**order_payment_method_amounts.sql**. Use a split screen in the code editor to keep both files open at once to check what Jinja  has compiled.
+  The compiled SQL should be the same as lest step's SQL, but is much easier to maintained.
+
+## [7 Set Variables​](https://docs.getdbt.com/guides/using-jinja?step=4)
+
+You can now setting variables at the top of a model, as it helps with readability, and enables you to reference the list in multiple places if required. 
+
+- Edit models/**order_payment_method_amounts.sql**:
   
-***models/stg_orders.sql***
-```sql
-select
-    id as order_id,
-    user_id as customer_id,
-    order_date,
-    status
+```SQL
+{% set payment_methods = ["bank_transfer", "credit_card", "gift_card"] %}
 
-from dbt_jaffle_shop.orders
+select
+order_id,
+{% for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount,
+{% endfor %}
+sum(amount) as total_amount
+from {{ ref('raw_payments') }}
+group by 1
 ```
 
-***models/customers.sql***
+- Enter the dbt run in command-line.
+
+## [8 Build models on top of other models​](https://docs.getdbt.com/guides/using-jinja?step=5)
+
+As the previous query, our last column is outside of the `for` loop. If the last iteration of a loop is our final column, we need to ensure there isn't a trailing comma at the end, or it would cause error. like this:
+
 ```SQL
-with customers as (
+{% set payment_methods = ["bank_transfer", "credit_card", "gift_card"] %}
 
-    select * from {{ ref('stg_customers') }}
+select
+order_id,
+{% for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount,
+{% endfor %}
+from {{ ref('raw_payments') }}
+group by 1
+```
 
-),
+However, we can use an `if` statement, along with the Jinja variable `loop.last`, to ensure we don't add an extraneous comma:
 
-orders as (
+```SQL
+{% set payment_methods = ["bank_transfer", "credit_card", "gift_card"] %}
 
-    select * from {{ ref('stg_orders') }}
-
-),
-
-customer_orders as (
-
-    select
-        customer_id,
-
-        min(order_date) as first_order_date,
-        max(order_date) as most_recent_order_date,
-        count(order_id) as number_of_orders
-
-    from orders
-
-    group by 1
-
-),
-
-final as (
-
-    select
-        customers.customer_id,
-        customers.first_name,
-        customers.last_name,
-        customer_orders.first_order_date,
-        customer_orders.most_recent_order_date,
-        coalesce(customer_orders.number_of_orders, 0) as number_of_orders
-
-    from customers
-
-    left join customer_orders using (customer_id)
-)
-
-select * from final
+select
+order_id,
+{% for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount
+{% if not loop.last %},{% endif %}
+{% endfor %}
+from {{ ref('raw_payments') }}
+group by 1
 ```
 
 - Execute dbt run.
 
-## [12 Add tests to your models​](https://docs.getdbt.com/guides/manual-install?step=12)
+## [9 Use whitespace control to tidy up compiled code](https://docs.getdbt.com/guides/using-jinja?step=6)
 
-Adding tests to a project helps validate that your models are working correctly.
+If you have checked the compiled SQL in the `target/compiled` folder, you might have noticed that this code results in a lot of white space.
 
-To add tests to your project:
-
-- Create a new YAML file in the models directory, named models/schema.yml
-
-- Add the following contents to the file:
-
-***models/schema.yml***
+Let's git rid of it with whitespace control we have learnt from [Jinja2-101-template](https://github.com/saastool/jinja2-101) in order to tidy up our code:
 
 ```SQL
-version: 2
+{%- set payment_methods = ["bank_transfer", "credit_card", "gift_card"] -%}
 
-models:
-  - name: customers
-    columns:
-      - name: customer_id
-        tests:
-          - unique
-          - not_null
-
-  - name: stg_customers
-    columns:
-      - name: customer_id
-        tests:
-          - unique
-          - not_null
-
-  - name: stg_orders
-    columns:
-      - name: order_id
-        tests:
-          - unique
-          - not_null
-      - name: status
-        tests:
-          - accepted_values:
-              values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
-      - name: customer_id
-        tests:
-          - not_null
-          - relationships:
-              to: ref('stg_customers')
-              field: customer_id
+select
+order_id,
+{%- for payment_method in payment_methods %}
+sum(case when payment_method = '{{payment_method}}' then amount end) as {{payment_method}}_amount
+{%- if not loop.last %},{% endif -%}
+{% endfor %}
+from {{ ref('raw_payments') }}
+group by 1
 ```
 
-- Run dbt test, and confirm that all your tests passed.
+- Execute dbt run.
 
 ## [13 Document your models​](https://docs.getdbt.com/guides/manual-install?step=13)
 
