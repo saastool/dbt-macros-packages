@@ -501,4 +501,4 @@ group by 1
 
 - Execute dbt run.
 
-Our dbt-macros-packages turtorial ends here, we have learnt how to use jinja with dbt, macro and package, and the potential of it. This is just a tip of it, but is enough to prepared anyone to dive in to any project that use dbt. Much more, if you want to learn more about what else can the packages do, please check in [dbt-util](https://github.com/dbt-labs/dbt-utils).
+Our dbt-macros-packages turtorial ends here, we have learnt the potential of jinja with dbt, macro and package. This is just the tip of the iceberg, but it's enough to prepared anyone planning to dive in to any project that use dbt. Much more, if you want to learn more about what else can the packages do, please check in [dbt-util](https://github.com/dbt-labs/dbt-utils).
