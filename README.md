@@ -181,13 +181,13 @@ dbt debug
   - copy seeds data
   **Windows**
   ```
-  copy ..\db\seeds\*.csv seeds
+  copy ..\db\*.csv seeds
   dbt seed
   ```
 
   **Mac**
   ```
-  cp ../db/seeds/*.csv seeds
+  cp ../db/*.csv seeds
   dbt seed
   ```
   
