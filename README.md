@@ -228,6 +228,8 @@ dbt run
 
 An intuitive approached for repeated codes is using loop, so let's give it a try:
 
+- Open the compiled SQL file in /target/compiled/dbt_jinja/models/**order_payment_method_amounts.sql**. Use a split screen in the code editor to keep both files open at once to check what Jinja  has compiled.
+
 - Edit models/**order_payment_method_amounts.sql**:
   
 ```SQL
@@ -243,7 +245,6 @@ group by 1
 
 - Enter the dbt run in command-line.
 
-- Open the compiled SQL file in /target/compiled/dbt_jinja/models/**order_payment_method_amounts.sql**. Use a split screen in the code editor to keep both files open at once to check what Jinja  has compiled.
   The compiled SQL should be the same as lest step's SQL, but is much easier to maintained.
 
 ## [7 Set Variables​](https://docs.getdbt.com/guides/using-jinja?step=4)
