@@ -187,7 +187,7 @@ dbt debug
 
   **Mac**
   ```
-  copy ../db/seeds/*.csv seeds
+  cp ../db/seeds/*.csv seeds
   dbt seed
   ```
   
